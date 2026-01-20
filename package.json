@@ -77,7 +77,7 @@
         "lightningcss-win32-x64-msvc": "^1.29.1"
     },
     "lint-staged": {
-        "*.ts,*.tsx": [
+        "*.js,*.jsx,*.cjs,*.ts,*.tsx": [
             "eslint --fix",
             "prettier --write"
         ]

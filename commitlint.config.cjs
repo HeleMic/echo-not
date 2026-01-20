@@ -1,3 +1,5 @@
+/* global module */
+
 /**
  * @type {import('@commitlint/types').UserConfig}
  */
