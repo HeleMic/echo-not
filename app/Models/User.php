@@ -3,10 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Enums\UserRole;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -48,5 +49,25 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Determine if the user has the "user" role.
+     *
+     * @return bool
+     */
+    public function isUser(): bool
+    {
+        return UserRole::from($this->role) === UserRole::User;
+    }
+
+    /**
+     * Determine if the user has the "admin" role.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return UserRole::from($this->role) === UserRole::Admin;
     }
 }
