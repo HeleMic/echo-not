@@ -26,6 +26,10 @@ class ApplicationService
      */
     public function getAll(User $user): Collection
     {
+        if ($user->isAdmin()) {
+            return Application::all();
+        }
+
         return Application::ownedBy($user)->get();
     }
 
