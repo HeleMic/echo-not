@@ -2,11 +2,10 @@
 
 namespace App\Services\Applications;
 
-use Str;
 use App\Models\User;
 use App\Models\Application;
+use Illuminate\Support\Str;
 use App\DTO\Applications\ApplicationDTO;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApplicationService
@@ -42,11 +41,9 @@ class ApplicationService
      */
     public function create(ApplicationDTO $dto): Application
     {
-        if ($dto->id === null) {
-            $dto = $dto->withApiKey(
-                config('application.api_key.prefix') . Str::random(config('application.api_key.length'))
-            );
-        }
+        $dto = $dto->withApiKey(
+            config('application.api_key.prefix') . Str::random(config('application.api_key.length'))
+        );
 
         return Application::create([
             'name' => $dto->name,
