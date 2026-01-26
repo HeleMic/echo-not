@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use function PHPUnit\Framework\assertTrue;
 use Symfony\Component\HttpFoundation\Response;
 
 test('user can create a new application', function () {
@@ -24,6 +23,25 @@ test('user cannot create application when not authenticated', function () {
     ]);
 
     $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+});
+
+test('user cannot create two application with the same name', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user, 'sanctum');
+
+    $firstResponse = $this->postJson(route('applications.store'), [
+        'name' => 'Test Application',
+        'description' => 'This is a test application.',
+    ]);
+
+    $secondResponse = $this->postJson(route('applications.store'), [
+        'name' => 'Test Application',
+        'description' => 'This is a test application.',
+    ]);
+
+    $firstResponse->assertStatus(Response::HTTP_CREATED);
+    $secondResponse->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 });
 
 test('user can view their own application', function () {

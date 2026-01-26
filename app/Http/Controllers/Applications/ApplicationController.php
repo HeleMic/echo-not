@@ -9,6 +9,7 @@ use App\DTO\Applications\ApplicationDTO;
 use App\Services\Applications\ApplicationService;
 use App\Http\Resources\Applications\ApplicationResource;
 use App\Http\Requests\Applications\StoreApplicationRequest;
+use App\Http\Requests\Applications\UpdateApplicationRequest;
 
 class ApplicationController extends Controller
 {
@@ -73,15 +74,15 @@ class ApplicationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\Applications\StoreApplicationRequest $request
+     * @param  \App\Http\Requests\Applications\UpdateApplicationRequest $request
      * @param  \App\Models\Application $application
      * @return \App\Http\Resources\Applications\ApplicationResource
      */
-    public function update(StoreApplicationRequest $request, Application $application): ApplicationResource
+    public function update(UpdateApplicationRequest $request, Application $application): ApplicationResource
     {
         $this->authorize('update', $application);
 
-        $dto = ApplicationDTO::fromStoreRequest($request);
+        $dto = ApplicationDTO::fromUpdateRequest($request);
 
         $application = $this->applicationService->update($application, $dto);
 

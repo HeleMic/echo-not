@@ -3,6 +3,7 @@
 namespace App\DTO\Applications;
 
 use App\Http\Requests\Applications\StoreApplicationRequest;
+use App\Http\Requests\Applications\UpdateApplicationRequest;
 
 final class ApplicationDTO
 {
@@ -26,6 +27,18 @@ final class ApplicationDTO
      * @return \App\DTO\Applications\ApplicationDTO
      */
     public static function fromStoreRequest(StoreApplicationRequest $request): self
+    {
+        $validated = $request->validated();
+        return self::fromArray($validated);
+    }
+
+    /**
+     * Returns a new class instance from `UpdateApplicationRequest`.
+     *
+     * @param  \App\Http\Requests\Applications\UpdateApplicationRequest $request
+     * @return \App\DTO\Applications\ApplicationDTO
+     */
+    public static function fromUpdateRequest(UpdateApplicationRequest $request): self
     {
         $validated = $request->validated();
         return self::fromArray($validated);

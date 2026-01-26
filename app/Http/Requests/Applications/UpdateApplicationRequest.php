@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Applications;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreApplicationRequest extends FormRequest
+class UpdateApplicationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,7 +28,7 @@ class StoreApplicationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'unique:applications',
+                Rule::unique('users')->ignore($this->user()->id->toString()),
             ],
             'description' => ['nullable', 'string'],
         ];
