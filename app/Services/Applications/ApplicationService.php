@@ -42,7 +42,9 @@ class ApplicationService
     public function create(ApplicationDTO $dto): Application
     {
         if ($dto->id === null) {
-            $dto->apiKey = config('application.api_key.prefix') . Str::random(config('application.api_key.length'));
+            $dto = $dto->withApiKey(
+                config('application.api_key.prefix') . Str::random(config('application.api_key.length'))
+            );
         }
 
         return Application::create([

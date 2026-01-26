@@ -45,8 +45,8 @@ class ApplicationController extends Controller
     {
         $this->authorize('create', Application::class);
 
-        $dto = ApplicationDTO::fromStoreRequest($request);
-        $dto->userId = $request->user()->id;
+        $dto = ApplicationDTO::fromStoreRequest($request)
+            ->withUserId($request->user()->id);
 
         $application = $this->applicationService->create($dto);
 

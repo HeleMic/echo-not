@@ -12,12 +12,46 @@ final class ApplicationDTO
      */
     public function __construct(
         public readonly ?string $id,
-        public ?string $userId,
+        public readonly ?string $userId,
         public readonly string $name,
         public readonly ?string $description,
-        public ?string $apiKey,
+        public readonly ?string $apiKey,
     ) {
         //
+    }
+
+    /**
+     * Returns a new class instance with the given user ID.
+     *
+     * @param  string $userId
+     * @return \App\DTO\Applications\ApplicationDTO
+     */
+    public function withUserId(string $userId): self
+    {
+        return new self(
+            id: $this->id,
+            userId: $userId,
+            name: $this->name,
+            description: $this->description,
+            apiKey: $this->apiKey,
+        );
+    }
+
+    /**
+     * Returns a new class instance with the given API key.
+     *
+     * @param  string $apiKey
+     * @return \App\DTO\Applications\ApplicationDTO
+     */
+    public function withApiKey(string $apiKey): self
+    {
+        return new self(
+            id: $this->id,
+            userId: $this->userId,
+            name: $this->name,
+            description: $this->description,
+            apiKey: $apiKey,
+        );
     }
 
     /**
