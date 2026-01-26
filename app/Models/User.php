@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use Illuminate\Support\Str;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -72,7 +73,15 @@ class User extends Authenticatable
      */
     public function isUser(): bool
     {
-        return UserRole::from($this->role) === UserRole::User;
+        if ($this->role instanceof UserRole) {
+            return $this->role === UserRole::User;
+        }
+
+        if (\is_String($this->role)) {
+            return UserRole::tryFrom($this->role) === UserRole::User;
+        }
+
+        return false;
     }
 
     /**
@@ -82,6 +91,14 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return UserRole::from($this->role) === UserRole::Admin;
+        if ($this->role instanceof UserRole) {
+            return $this->role === UserRole::Admin;
+        }
+
+        if (\is_String($this->role)) {
+            return UserRole::tryFrom($this->role) === UserRole::Admin;
+        }
+
+        return false;
     }
 }

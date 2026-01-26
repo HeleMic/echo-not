@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use function PHPUnit\Framework\assertTrue;
 use Symfony\Component\HttpFoundation\Response;
 
 test('user can create a new application', function () {
@@ -60,6 +61,27 @@ test('user cannot view another user\'s application', function () {
     $response = $this->getJson(route('applications.show', ['application' => $applicationId]));
 
     $response->assertStatus(Response::HTTP_FORBIDDEN);
+});
+
+test('user admin can view all application', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+    $user3 = User::factory()->withAdmin()->create();
+
+    foreach ([$user1, $user2] as $user) {
+        $this->actingAs($user, 'sanctum');
+
+        $response = $this->postJson(route('applications.store'), [
+            'name' => 'Test Application (' . $user->id->toString() . ')',
+            'description' => 'This is a test application.',
+        ]);
+    }
+
+    $this->actingAs($user3, 'sanctum');
+
+    $response = $this->getJson(route('applications.index'));
+
+    $response->assertStatus(Response::HTTP_OK);
 });
 
 test('user can update their own application', function () {
