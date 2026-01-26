@@ -12,7 +12,10 @@ return new class extends Migration {
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->index();
+            $table->foreignUuid('user_id')
+                ->constrained(table: 'users', column: 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->string('name')->unique();
             $table->string('description')->nullable();
             $table->string('api_key')->unique();
