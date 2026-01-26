@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Application;
 use App\DTO\Applications\ApplicationDTO;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApplicationService
 {
@@ -22,15 +23,15 @@ class ApplicationService
      * Get all applications.
      *
      * @param  \App\Models\User $user
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Application>
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getAll(User $user): Collection
+    public function getAll(User $user): LengthAwarePaginator
     {
         if ($user->isAdmin()) {
-            return Application::all();
+            return Application::paginate(10);
         }
 
-        return Application::ownedBy($user)->get();
+        return Application::ownedBy($user)->paginate(15);
     }
 
     /**
