@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Applications;
 use App\Models\Application;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Gate;
 use App\DTO\Applications\ApplicationDTO;
 use App\Services\Applications\ApplicationService;
 use App\Http\Resources\Applications\ApplicationResource;
@@ -28,7 +27,7 @@ class ApplicationController extends Controller
      */
     public function index()
     {
-        $this->authorize('viewAny');
+        $this->authorize('viewAny', Application::class);
 
         $applications = $this->applicationService->getAll(auth()->user());
 
@@ -43,14 +42,17 @@ class ApplicationController extends Controller
      */
     public function store(StoreApplicationRequest $request): ApplicationResource
     {
-        $this->authorize('create');
+        $this->authorize('create', Application::class);
 
         $dto = ApplicationDTO::fromStoreRequest($request);
         $dto->userId = $request->user()->id;
 
         $application = $this->applicationService->create($dto);
 
-        return new ApplicationResource($application);
+        $resource = new ApplicationResource($application);
+        $resource->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+
+        return $resource;
     }
 
     /**
