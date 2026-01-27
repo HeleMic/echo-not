@@ -1,19 +1,22 @@
 <?php
 
 use App\Models\User;
-use Symfony\Component\HttpFoundation\Response;
+use App\Models\Application;
 
 test('user can create a new application', function () {
     $user = User::factory()->create();
 
-    $this->actingAs($user, 'sanctum');
+    $response = $this
+        ->actingAs($user, 'sanctum')
+        ->postJson(route('applications.store'), [
+            'name' => 'Test Application',
+            'description' => 'This is a test application.',
+        ]);
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
+    $response->assertCreated();
 
-    $response->assertStatus(Response::HTTP_CREATED);
+    expect($response->json('data.name'))->toBe('Test Application');
+    expect($response->json('data.description'))->toBe('This is a test application.');
 });
 
 test('user cannot create application when not authenticated', function () {
@@ -22,7 +25,7 @@ test('user cannot create application when not authenticated', function () {
         'description' => 'This is a test application.',
     ]);
 
-    $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+    $response->assertUnauthorized();
 });
 
 test('user cannot create two application with the same name', function () {
@@ -40,45 +43,38 @@ test('user cannot create two application with the same name', function () {
         'description' => 'This is a test application.',
     ]);
 
-    $firstResponse->assertStatus(Response::HTTP_CREATED);
-    $secondResponse->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+    $firstResponse->assertCreated();
+    $secondResponse->assertUnprocessable();
+
+    expect($firstResponse->json('data.name'))->toBe('Test Application');
+    expect($firstResponse->json('data.description'))->toBe('This is a test application.');
 });
 
 test('user can view their own application', function () {
     $user = User::factory()->create();
+    $application = Application::factory()->withUser($user)->create();
 
-    $this->actingAs($user, 'sanctum');
+    $response = $this
+        ->actingAs($user, 'sanctum')
+        ->getJson(route('applications.show', [
+            'application' => $application->id,
+        ]));
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $applicationId = $response->json('data.id');
-
-    $response = $this->getJson(route('applications.show', ['application' => $applicationId]));
-
-    $response->assertStatus(Response::HTTP_OK);
+    $response->assertOk();
 });
 
 test('user cannot view another user\'s application', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
+    $application = Application::factory()->withUser($user1)->create();
 
-    $this->actingAs($user1, 'sanctum');
+    $response = $this
+        ->actingAs($user2, 'sanctum')
+        ->getJson(route('applications.show', [
+            'application' => $application->id,
+        ]));
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $applicationId = $response->json('data.id');
-
-    $this->actingAs($user2, 'sanctum');
-
-    $response = $this->getJson(route('applications.show', ['application' => $applicationId]));
-
-    $response->assertStatus(Response::HTTP_FORBIDDEN);
+    $response->assertForbidden();
 });
 
 test('user admin can view all application', function () {
@@ -86,98 +82,73 @@ test('user admin can view all application', function () {
     $user2 = User::factory()->create();
     $user3 = User::factory()->withAdmin()->create();
 
-    foreach ([$user1, $user2] as $user) {
-        $this->actingAs($user, 'sanctum');
+    Application::factory()->withUser($user1)->create();
+    Application::factory()->withUser($user2)->create();
 
-        $response = $this->postJson(route('applications.store'), [
-            'name' => 'Test Application (' . $user->id->toString() . ')',
-            'description' => 'This is a test application.',
-        ]);
-    }
+    $response = $this
+        ->actingAs($user3, 'sanctum')
+        ->getJson(route('applications.index'));
 
-    $this->actingAs($user3, 'sanctum');
-
-    $response = $this->getJson(route('applications.index'));
-
-    $response->assertStatus(Response::HTTP_OK);
+    $response->assertOk();
+    expect(count($response->json('data')))->toBe(2);
 });
 
 test('user can update their own application', function () {
     $user = User::factory()->create();
+    $application = Application::factory()->withUser($user)->create();
 
-    $this->actingAs($user, 'sanctum');
+    $response = $this
+        ->actingAs($user, 'sanctum')
+        ->putJson(route('applications.update', ['application' => $application->id]), [
+            'name' => 'Test Application updated',
+            'description' => 'This is a test application (updated).',
+        ]);
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $applicationId = $response->json('data.id');
-
-    $response = $this->putJson(route('applications.update', ['application' => $applicationId]), [
-        'name' => 'Test Application updated',
-        'description' => 'This is a test application (updated).',
-    ]);
-
-    $response->assertStatus(Response::HTTP_OK);
+    $response->assertOk();
+    expect($response->json('data.name'))->toBe('Test Application updated');
+    expect($response->json('data.description'))->toBe('This is a test application (updated).');
 });
 
 test('user cannot update another user\'s application', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $this->actingAs($user1, 'sanctum');
+    $application = Application::factory()->withUser($user1)->create();
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
+    $response = $this
+        ->actingAs($user2, 'sanctum')
+        ->putJson(route('applications.update', ['application' => $application->id]), [
+            'name' => 'Test Application updated',
+            'description' => 'This is a test application (updated).',
+        ]);
 
-    $applicationId = $response->json('data.id');
-
-    $this->actingAs($user2, 'sanctum');
-
-    $response = $this->putJson(route('applications.update', ['application' => $applicationId]), [
-        'name' => 'Test Application updated',
-        'description' => 'This is a test application (updated).',
-    ]);
-
-    $response->assertStatus(Response::HTTP_FORBIDDEN);
+    $response->assertForbidden();
 });
 
 test('user can delete their own application', function () {
     $user = User::factory()->create();
+    $application = Application::factory()->withUser($user)->create();
 
-    $this->actingAs($user, 'sanctum');
+    $response = $this
+        ->actingAs($user, 'sanctum')
+        ->deleteJson(route('applications.destroy', [
+            'application' => $application->id,
+        ]));
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $applicationId = $response->json('data.id');
-
-    $response = $this->deleteJson(route('applications.destroy', ['application' => $applicationId]));
-
-    $response->assertStatus(Response::HTTP_NO_CONTENT);
+    $response->assertNoContent();
 });
 
-test('user can delete another user\'s application', function () {
+test('user cannot delete another user\'s application', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $this->actingAs($user1, 'sanctum');
+    $application = Application::factory()->withUser($user1)->create();
 
-    $response = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
+    $response = $this
+        ->actingAs($user2, 'sanctum')
+        ->deleteJson(route('applications.destroy', [
+            'application' => $application->id,
+        ]));
 
-    $applicationId = $response->json('data.id');
-
-    $this->actingAs($user2, 'sanctum');
-
-    $response = $this->deleteJson(route('applications.destroy', ['application' => $applicationId]));
-
-    $response->assertStatus(Response::HTTP_FORBIDDEN);
+    $response->assertForbidden();
 });
