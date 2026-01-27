@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Application;
+use Symfony\Component\VarDumper\VarDumper;
 
 class ApplicationPolicy
 {
@@ -20,7 +21,7 @@ class ApplicationPolicy
      */
     public function view(User $user, Application $application): bool
     {
-        return $user->id->toString() === $application->user_id;
+        return $application->user()->is($user);
     }
 
     /**
@@ -36,7 +37,7 @@ class ApplicationPolicy
      */
     public function update(User $user, Application $application): bool
     {
-        return $user->id->toString() === $application->user_id;
+        return $application->user()->is($user);
     }
 
     /**
@@ -44,7 +45,7 @@ class ApplicationPolicy
      */
     public function delete(User $user, Application $application): bool
     {
-        return $user->id->toString() === $application->user_id;
+        return $application->user()->is($user);
     }
 
     /**
@@ -60,6 +61,6 @@ class ApplicationPolicy
      */
     public function forceDelete(User $user, Application $application): bool
     {
-        return $user->id->toString() === $application->user_id;
+        return $application->user()->is($user);
     }
 }

@@ -19,7 +19,6 @@ class ApplicationFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => Str::uuid(),
             'user_id' => User::factory(),
             'name' => fake()->name(),
             'description' => fake()->sentence(),
