@@ -3,6 +3,7 @@
 namespace App\Services\Applications;
 
 use App\Models\User;
+use App\Support\ApiKey;
 use App\Models\Application;
 use Illuminate\Support\Str;
 use App\DTO\Applications\ApplicationDTO;
@@ -41,9 +42,7 @@ class ApplicationService
      */
     public function create(ApplicationDTO $dto): Application
     {
-        $dto = $dto->withApiKey(
-            config('application.api_key.prefix') . Str::random(config('application.api_key.length'))
-        );
+        $dto = $dto->withApiKey(ApiKey::generate());
 
         return Application::create([
             'name' => $dto->name,
