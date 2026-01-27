@@ -20,7 +20,7 @@ class ApplicationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->name(),
+            'name' => fake()->unique()->words(3, true),
             'description' => fake()->sentence(),
             'api_key' => ApiKey::generate(),
         ];

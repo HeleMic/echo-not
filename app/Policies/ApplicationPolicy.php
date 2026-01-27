@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Application;
-use Symfony\Component\VarDumper\VarDumper;
 
 class ApplicationPolicy
 {

@@ -13,9 +13,9 @@ class ApiKey
      */
     public static function generate(): string
     {
-        $settins = self::getSettings();
+        $settings = self::getSettings();
 
-        return $settins['prefix'] . Str::random($settins['length']);
+        return $settings['prefix'] . Str::random($settings['length']);
     }
 
     /**
