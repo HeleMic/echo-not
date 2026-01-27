@@ -28,7 +28,7 @@ class UpdateApplicationRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('users')->ignore($this->user()->id->toString()),
+                Rule::unique('applications')->ignore($this->route('application')),
             ],
             'description' => ['nullable', 'string'],
         ];
