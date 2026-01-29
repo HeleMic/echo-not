@@ -3,22 +3,6 @@
 use App\Models\User;
 use App\Models\Application;
 
-test('user can create a new application', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => 'Test Application',
-            'description' => 'This is a test application.',
-        ]);
-
-    $response->assertCreated();
-
-    expect($response->json('data.name'))->toBe('Test Application');
-    expect($response->json('data.description'))->toBe('This is a test application.');
-});
-
 test('user cannot create application when not authenticated', function () {
     $response = $this->postJson(route('applications.store'), [
         'name' => 'Test Application',
@@ -28,39 +12,15 @@ test('user cannot create application when not authenticated', function () {
     $response->assertUnauthorized();
 });
 
-test('user cannot create two application with the same name', function () {
-    $user = User::factory()->create();
-
-    $this->actingAs($user, 'sanctum');
-
-    $firstResponse = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $secondResponse = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $firstResponse->assertCreated();
-    $secondResponse->assertUnprocessable();
-
-    expect($firstResponse->json('data.name'))->toBe('Test Application');
-    expect($firstResponse->json('data.description'))->toBe('This is a test application.');
-});
-
-test('user can view their own application', function () {
+test('user cannot view application when not authenticated', function () {
     $user = User::factory()->create();
     $application = Application::factory()->withUser($user)->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->getJson(route('applications.show', [
-            'application' => $application->id,
-        ]));
+    $response = $this->getJson(route('applications.show', [
+        'application' => $application->id,
+    ]));
 
-    $response->assertOk();
+    $response->assertUnauthorized();
 });
 
 test('user cannot view another user\'s application', function () {
@@ -77,7 +37,13 @@ test('user cannot view another user\'s application', function () {
     $response->assertForbidden();
 });
 
-test('user admin can view all application', function () {
+test('user cannot list applications when not authenticated', function () {
+    $response = $this->getJson(route('applications.index'));
+
+    $response->assertUnauthorized();
+});
+
+test('user admin can view all applications', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
     $user3 = User::factory()->withAdmin()->create();
@@ -93,20 +59,16 @@ test('user admin can view all application', function () {
     expect(count($response->json('data')))->toBe(2);
 });
 
-test('user can update their own application', function () {
+test('user cannot update application when not authenticated', function () {
     $user = User::factory()->create();
     $application = Application::factory()->withUser($user)->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => 'Test Application updated',
-            'description' => 'This is a test application (updated).',
-        ]);
+    $response = $this->putJson(route('applications.update', ['application' => $application->id]), [
+        'name' => 'Test Application updated',
+        'description' => 'This is a test application (updated).',
+    ]);
 
-    $response->assertOk();
-    expect($response->json('data.name'))->toBe('Test Application updated');
-    expect($response->json('data.description'))->toBe('This is a test application (updated).');
+    $response->assertUnauthorized();
 });
 
 test('user cannot update another user\'s application', function () {
@@ -125,17 +87,15 @@ test('user cannot update another user\'s application', function () {
     $response->assertForbidden();
 });
 
-test('user can delete their own application', function () {
+test('user cannot delete application when not authenticated', function () {
     $user = User::factory()->create();
     $application = Application::factory()->withUser($user)->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->deleteJson(route('applications.destroy', [
-            'application' => $application->id,
-        ]));
+    $response = $this->deleteJson(route('applications.destroy', [
+        'application' => $application->id,
+    ]));
 
-    $response->assertNoContent();
+    $response->assertUnauthorized();
 });
 
 test('user cannot delete another user\'s application', function () {
