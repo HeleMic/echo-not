@@ -5,7 +5,6 @@ namespace App\Services\Applications;
 use App\Models\User;
 use App\Support\ApiKey;
 use App\Models\Application;
-use Illuminate\Support\Str;
 use App\DTO\Applications\ApplicationDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -28,10 +27,10 @@ class ApplicationService
     public function getAll(User $user): LengthAwarePaginator
     {
         if ($user->isAdmin()) {
-            return Application::paginate(10);
+            return Application::paginate(config('constants.pagination.elements_for_page'));
         }
 
-        return Application::ownedBy($user)->paginate(15);
+        return Application::ownedBy($user)->paginate(config('constants.pagination.elements_for_page'));
     }
 
     /**
