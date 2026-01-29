@@ -30,7 +30,7 @@ class UpdateApplicationRequest extends FormRequest
                 'max:255',
                 Rule::unique('applications')->ignore($this->route('application')),
             ],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

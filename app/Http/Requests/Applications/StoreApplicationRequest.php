@@ -29,7 +29,7 @@ class StoreApplicationRequest extends FormRequest
                 'max:255',
                 'unique:applications',
             ],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
