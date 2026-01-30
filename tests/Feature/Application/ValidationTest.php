@@ -23,7 +23,7 @@ test('user cannot create application with name too long', function () {
         ->actingAs($user, 'sanctum')
         ->postJson(route('applications.store'), [
             'name' => fake()->text(500),
-            'description' => 'This is a test application without name.',
+            'description' => 'This is a test application with a long name.',
         ]);
 
     $response->assertUnprocessable();
@@ -46,6 +46,20 @@ test('user cannot create two application with the same name', function () {
 
     $firstResponse->assertCreated();
     $secondResponse->assertUnprocessable();
+});
+
+test('user can update application keeping the same name', function () {
+    $user = User::factory()->create();
+    $application = Application::factory()->withUser($user)->create();
+
+    $response = $this
+        ->actingAs($user, 'sanctum')
+        ->putJson(route('applications.update', ['application' => $application->id]), [
+            'name' => $application->name,
+            'description' => 'This is a test application (updated).',
+        ]);
+
+    $response->assertOk();
 });
 
 test('user cannot update application with empty name', function () {
