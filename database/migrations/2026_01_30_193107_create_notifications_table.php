@@ -12,11 +12,15 @@ return new class extends Migration {
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')
+                ->constrained(table: 'users', column: 'id')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
             $table->foreignUuid('application_id')
                 ->constrained(table: 'applications', column: 'id')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->enum('type', ['email', 'sms', 'websocket']);
+            $table->enum('type', ['email', 'push', 'sms']);
             $table->string('title');
             $table->text('html');
             $table->text('text');

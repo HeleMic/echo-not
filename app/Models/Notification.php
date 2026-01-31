@@ -31,6 +31,7 @@ class Notification extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'user_id',
         'application_id',
         'type',
         'title',
