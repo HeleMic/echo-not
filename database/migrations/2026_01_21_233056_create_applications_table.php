@@ -18,7 +18,6 @@ return new class extends Migration {
                 ->onDelete('cascade');
             $table->string('name')->unique();
             $table->string('description')->nullable();
-            $table->string('api_key')->unique();
             $table->timestamps();
         });
     }

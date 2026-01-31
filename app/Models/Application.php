@@ -36,7 +36,6 @@ class Application extends Model
         'user_id',
         'name',
         'description',
-        'api_key',
     ];
 
     /**
@@ -44,9 +43,7 @@ class Application extends Model
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'api_key',
-    ];
+    protected $hidden = [];
 
     /**
      * Get the user that owns the application

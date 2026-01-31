@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO\Applications;
+namespace App\DTO;
 
 use App\Http\Requests\Applications\StoreApplicationRequest;
 use App\Http\Requests\Applications\UpdateApplicationRequest;
@@ -15,7 +15,6 @@ final class ApplicationDTO
         public readonly ?string $userId,
         public readonly string $name,
         public readonly ?string $description,
-        public readonly ?string $apiKey,
     ) {
         //
     }
@@ -24,7 +23,7 @@ final class ApplicationDTO
      * Returns a new class instance with the given user ID.
      *
      * @param  string $userId
-     * @return \App\DTO\Applications\ApplicationDTO
+     * @return \App\DTO\ApplicationDTO
      */
     public function withUserId(string $userId): self
     {
@@ -33,24 +32,6 @@ final class ApplicationDTO
             userId: $userId,
             name: $this->name,
             description: $this->description,
-            apiKey: $this->apiKey,
-        );
-    }
-
-    /**
-     * Returns a new class instance with the given API key.
-     *
-     * @param  string $apiKey
-     * @return \App\DTO\Applications\ApplicationDTO
-     */
-    public function withApiKey(string $apiKey): self
-    {
-        return new self(
-            id: $this->id,
-            userId: $this->userId,
-            name: $this->name,
-            description: $this->description,
-            apiKey: $apiKey,
         );
     }
 
@@ -58,7 +39,7 @@ final class ApplicationDTO
      * Returns a new class instance from `StoreApplicationRequest`.
      *
      * @param  \App\Http\Requests\Applications\StoreApplicationRequest $request
-     * @return \App\DTO\Applications\ApplicationDTO
+     * @return \App\DTO\ApplicationDTO
      */
     public static function fromStoreRequest(StoreApplicationRequest $request): self
     {
@@ -70,7 +51,7 @@ final class ApplicationDTO
      * Returns a new class instance from `UpdateApplicationRequest`.
      *
      * @param  \App\Http\Requests\Applications\UpdateApplicationRequest $request
-     * @return \App\DTO\Applications\ApplicationDTO
+     * @return \App\DTO\ApplicationDTO
      */
     public static function fromUpdateRequest(UpdateApplicationRequest $request): self
     {
@@ -82,7 +63,7 @@ final class ApplicationDTO
      * Returns a new class instance from an array.
      *
      * @param  array $data
-     * @return \App\DTO\Applications\ApplicationDTO
+     * @return \App\DTO\ApplicationDTO
      */
     public static function fromArray(array $data): self
     {
@@ -91,7 +72,6 @@ final class ApplicationDTO
             userId: $data['userId'] ?? null,
             name: $data['name'],
             description: $data['description'] ?? null,
-            apiKey: $data['apiKey'] ?? null,
         );
     }
 }
