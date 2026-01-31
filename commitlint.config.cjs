@@ -21,6 +21,7 @@ module.exports = {
                 'ci', // Changes to CI configuration files and scripts
                 'chore', // Other changes that don't modify src or test files
                 'revert', // Reverts a previous commit
+                'wip', // Work in progress
             ],
         ],
         'type-case': [2, 'always', 'lower-case'],
