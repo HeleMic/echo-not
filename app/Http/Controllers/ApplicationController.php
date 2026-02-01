@@ -66,8 +66,6 @@ class ApplicationController extends Controller
     {
         $this->authorize('view', $application);
 
-        $application = $this->applicationService->find($application->id);
-
         return new ApplicationResource($application);
     }
 

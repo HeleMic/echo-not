@@ -48,17 +48,6 @@ class ApplicationService
     }
 
     /**
-     * Get an application by ID.
-     *
-     * @param  string $id
-     * @return \App\Models\Application
-     */
-    public function find(string $id): Application
-    {
-        return Application::findOrFail($id);
-    }
-
-    /**
      * Update an existing application by ID.
      *
      * @param  string $id
@@ -109,5 +98,4 @@ class ApplicationService
     {
         $application->delete();
     }
-
 }

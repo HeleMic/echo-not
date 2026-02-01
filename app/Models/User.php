@@ -68,9 +68,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the applications owner by the user.
+     * Get the applications owned by the user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Application>
      */
     public function applications(): HasMany
     {
