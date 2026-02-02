@@ -16,14 +16,14 @@ class ApiKeyResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'applicationId' => $this->application_id,
+            'application_id' => $this->application_id,
             'name' => $this->name,
             'key' => $this->when($request->routeIs('api-keys.store'), $this->key, config('api-keys.hidden_placeholder')),
-            'lastUsedAt' => $this->last_used_at,
-            'expiresAt' => $this->expires_at,
-            'revokedAt' => $this->revoked_at,
-            'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at,
+            'last_used_at' => $this->last_used_at,
+            'expires_at' => $this->expires_at,
+            'revoked_at' => $this->revoked_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

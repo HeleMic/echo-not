@@ -20,7 +20,7 @@ class ApplicationPolicy
      */
     public function view(User $user, Application $application): bool
     {
-        return $application->user()->is($user);
+        return $application->user->is($user);
     }
 
     /**

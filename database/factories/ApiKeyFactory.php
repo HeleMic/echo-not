@@ -2,6 +2,11 @@
 
 namespace Database\Factories;
 
+use DateTime;
+use DateTimeZone;
+use App\Support\ApiKey;
+use App\Models\Application;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +21,28 @@ class ApiKeyFactory extends Factory
      */
     public function definition(): array
     {
+        // Read max duration from config
+        $apiKeyMaxDuration = (string) config('api-keys.max_duration');
+        $fakeRangeMin = '+10 seconds';
+        $fakeRangeMax = "+$apiKeyMaxDuration seconds";
+
         return [
-            //
+            'application_id' => Application::factory(),
+            'name' => fake()->unique()->word(),
+            'key' => Hash::make(ApiKey::generate()),
+            'last_used_at' => null,
+            'expires_at' => fake()->datetimeBetween($fakeRangeMin, $fakeRangeMax, 'UTC')->format('Y-m-d H:i:s'),
+            'revoked_at' => null,
         ];
+    }
+
+    /**
+     * Indicate that the api key belongs to the given application.
+     */
+    public function withApplication(Application $application): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'application_id' => $application,
+        ]);
     }
 }

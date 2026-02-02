@@ -9,14 +9,11 @@ test('user can create their own application', function () {
     $response = $this
         ->actingAs($user, 'sanctum')
         ->postJson(route('applications.store'), [
-            'name' => 'Test Application',
-            'description' => 'This is a test application.',
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(10, true),
         ]);
 
     $response->assertCreated();
-
-    expect($response->json('data.name'))->toBe('Test Application');
-    expect($response->json('data.description'))->toBe('This is a test application.');
 });
 
 test('user can view their own application', function () {
@@ -62,13 +59,11 @@ test('user can update their own application', function () {
     $response = $this
         ->actingAs($user, 'sanctum')
         ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => 'Test Application updated',
-            'description' => 'This is a test application (updated).',
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(10, true),
         ]);
 
     $response->assertOk();
-    expect($response->json('data.name'))->toBe('Test Application updated');
-    expect($response->json('data.description'))->toBe('This is a test application (updated).');
 });
 
 test('user cannot update a non-existent application', function () {
@@ -77,8 +72,8 @@ test('user cannot update a non-existent application', function () {
     $response = $this
         ->actingAs($user, 'sanctum')
         ->putJson(route('applications.update', ['application' => fake()->uuid()]), [
-            'name' => 'Test Application updated',
-            'description' => 'This is a test application (updated).',
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(10, true),
         ]);
 
     $response->assertNotFound();

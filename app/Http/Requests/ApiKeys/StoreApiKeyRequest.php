@@ -23,9 +23,19 @@ class StoreApiKeyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'application_id' => 'required|uuid|exists:applications,id',
-            'name' => 'required|string|max:255',
-            'expires_at' => 'nullable|date|after:now',
+            'application_id' => ['required', 'uuid', 'exists:applications,id'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:api_keys',
+            ],
+            'expires_at' => [
+                'nullable',
+                'date',
+                'after:now',
+                'before_or_equal:' . now()->addSeconds((int) config('api-keys.max_duration'))->toDateTimeString()
+            ],
         ];
     }
 }

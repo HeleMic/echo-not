@@ -20,7 +20,7 @@ class ApiKeyPolicy
      */
     public function view(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 
     /**
@@ -36,7 +36,7 @@ class ApiKeyPolicy
      */
     public function update(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 
     /**
@@ -44,7 +44,7 @@ class ApiKeyPolicy
      */
     public function delete(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 
     /**
@@ -52,7 +52,7 @@ class ApiKeyPolicy
      */
     public function restore(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 
     /**
@@ -60,7 +60,7 @@ class ApiKeyPolicy
      */
     public function forceDelete(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 
     /**
@@ -68,6 +68,6 @@ class ApiKeyPolicy
      */
     public function revoke(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application()->user()->is($user);
+        return $user->isAdmin() || $apiKey->application->user->is($user);
     }
 }

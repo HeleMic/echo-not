@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\ApiKeys;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateApiKeyRequest extends FormRequest
@@ -23,8 +24,12 @@ class UpdateApiKeyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'expires_at' => 'nullable|date|after:now',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('api_keys')->ignore($this->route('api_key')),
+            ],
         ];
     }
 }

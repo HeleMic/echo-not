@@ -1,24 +1,36 @@
 <?php
 
 use App\Models\User;
+use App\Models\ApiKey;
 use App\Models\Application;
 
 test('store returns correct structure', function () {
     $user = User::factory()->create();
+    $application = Application::factory()->withUser($user)->create();
+
+    // Read max duration from config
+    $apiKeyMaxDuration = (string) config('api-keys.max_duration');
+    $fakeRangeMin = '+10 seconds';
+    $fakeRangeMax = "+$apiKeyMaxDuration seconds";
 
     $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => 'Test Application',
-            'description' => 'This is a test application.',
-        ]);
+        ->actingAs($user)
+        ->postJson(route('api-keys.store', [
+            'application_id' => $application->id,
+            'name' => fake()->unique()->word(),
+            'expires_at' => fake()->datetimeBetween($fakeRangeMin, $fakeRangeMax, 'UTC')->format('Y-m-d H:i:s'),
+        ]));
 
     $response->assertCreated();
 
     expect($response->json('data'))->toBeArray()->toHaveKeys([
         'id',
+        'application_id',
         'name',
-        'description',
+        'key',
+        'last_used_at',
+        'expires_at',
+        'revoked_at',
         'created_at',
         'updated_at',
     ]);
@@ -26,11 +38,13 @@ test('store returns correct structure', function () {
 
 test('index returns paginated structure', function () {
     $user = User::factory()->create();
-    Application::factory()->count(20)->withUser($user)->create();
+    $application = Application::factory()->withUser($user)->create();
+
+    ApiKey::factory()->withApplication($application)->count(20)->create();
 
     $response = $this
         ->actingAs($user, 'sanctum')
-        ->getJson(route('applications.index'));
+        ->getJson(route('api-keys.index'));
 
     $response->assertOk();
 
@@ -40,17 +54,22 @@ test('index returns paginated structure', function () {
 test('show returns correct structure', function () {
     $user = User::factory()->create();
     $application = Application::factory()->withUser($user)->create();
+    $apiKey = ApiKey::factory()->withApplication($application)->create();
 
     $response = $this
         ->actingAs($user, 'sanctum')
-        ->getJson(route('applications.show', ['application' => $application->id]));
+        ->getJson(route('api-keys.show', ['api_key' => $apiKey->id]));
 
     $response->assertOk();
 
     expect($response->json('data'))->toBeArray()->toHaveKeys([
         'id',
+        'application_id',
         'name',
-        'description',
+        'key',
+        'last_used_at',
+        'expires_at',
+        'revoked_at',
         'created_at',
         'updated_at',
     ]);
@@ -59,20 +78,24 @@ test('show returns correct structure', function () {
 test('update returns correct structure', function () {
     $user = User::factory()->create();
     $application = Application::factory()->withUser($user)->create();
+    $apiKey = ApiKey::factory()->withApplication($application)->create();
 
     $response = $this
         ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => 'Test Application updated',
-            'description' => 'This is a test application (updated).',
+        ->putJson(route('api-keys.update', ['api_key' => $apiKey->id]), [
+            'name' => fake()->unique()->word(),
         ]);
 
     $response->assertOk();
 
     expect($response->json('data'))->toBeArray()->toHaveKeys([
         'id',
+        'application_id',
         'name',
-        'description',
+        'key',
+        'last_used_at',
+        'expires_at',
+        'revoked_at',
         'created_at',
         'updated_at',
     ]);

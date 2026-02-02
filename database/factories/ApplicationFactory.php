@@ -19,8 +19,8 @@ class ApplicationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->unique()->words(3, true),
-            'description' => fake()->sentence(),
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(10, true),
         ];
     }
 

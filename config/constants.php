@@ -6,9 +6,20 @@ return [
     | Pagination
     |--------------------------------------------------------------------------
     |
-    | This options defines the default pagination settings for the
+    | This options defines the default pagination settings
     */
     'pagination' => [
         'elements_for_page' => 15,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Date
+    |--------------------------------------------------------------------------
+    |
+    | This options defines the default date settings
+    */
+    'date' => [
+        'format' => 'Y-m-d H:i:s',
     ],
 ];

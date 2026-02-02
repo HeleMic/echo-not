@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\User;
 use App\DTO\ApiKeyDTO;
 use App\Models\ApiKey;
-use App\Models\Application;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -42,15 +41,19 @@ class ApiKeyService
      */
     public function create(ApiKeyDTO $dto): ApiKey
     {
-        $key = \App\Support\ApiKey::generate();
+        // Generate a new hashed key
+        $dto = $dto->withKey(Hash::make(\App\Support\ApiKey::generate()));
 
-        $hashedKey = Hash::make($key);
+        // Set default expiration if not provided
+        if ($dto->expiresAt === null) {
+            $dto = $dto->withExpiresAt(now()->addSeconds(config('api-keys.duration')));
+        }
 
         return ApiKey::create([
-            'applicationId' => $dto->applicationId,
+            'application_id' => $dto->applicationId,
             'name' => $dto->name,
-            'key' => $hashedKey,
-            'expiresAt' => $dto->expiresAt,
+            'key' => $dto->key,
+            'expires_at' => $dto->expiresAt?->format(config('constants.date.format')),
         ]);
     }
 
@@ -65,7 +68,6 @@ class ApiKeyService
     {
         $apiKey->update([
             'name' => $dto->name,
-            'expiresAt' => $dto->expiresAt,
         ]);
         return $apiKey;
     }

@@ -61,7 +61,7 @@ class Application extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ApiKey>
      */
-    public function applications(): HasMany
+    public function apiKeys(): HasMany
     {
         return $this->hasMany(ApiKey::class);
     }
