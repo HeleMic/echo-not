@@ -2,20 +2,17 @@
 
 namespace App\DTO\ApiKeys;
 
-use App\DTO\FormRequestDTO;
-use Carbon\CarbonInterface;
-
-class StoreApiKeyDTO
+readonly class StoreApiKeyDTO
 {
-    use FormRequestDTO;
+    use \App\DTO\FormRequestDTO;
 
     /**
      * Create a new class instance.
      */
     public function __construct(
-        public readonly string $applicationId,
-        public readonly string $name,
-        public readonly ?string $expiresAt,
+        public string $applicationId,
+        public string $name,
+        public ?string $expiresAt,
     ) {
         //
     }

@@ -2,17 +2,15 @@
 
 namespace App\DTO\ApiKeys;
 
-use App\DTO\FormRequestDTO;
-
-class UpdateApiKeyDTO
+readonly class UpdateApiKeyDTO
 {
-    use FormRequestDTO;
+    use \App\DTO\FormRequestDTO;
 
     /**
      * Create a new class instance.
      */
     public function __construct(
-        public readonly string $name,
+        public string $name,
     ) {
         //
     }
