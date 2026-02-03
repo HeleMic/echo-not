@@ -30,6 +30,39 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('toHavePaginatedStructure', function (int $expectedCount = null) {
+    // Verify 'data'
+    $this->toHaveKey('data');
+    expect($this->value['data'])->toBeArray();
+
+    if ($expectedCount !== null) {
+        expect($this->value['data'])->toHaveLength($expectedCount);
+    }
+
+    // Verify 'links'
+    expect($this->value)->toHaveKey('links');
+    expect($this->value['links'])->toBeArray()->toHaveKeys([
+        'first',
+        'last',
+        'prev',
+        'next',
+    ]);
+
+    // Verify 'meta'
+    expect($this->value)->toHaveKey('meta');
+    expect($this->value['meta'])->toBeArray()->toHaveKeys([
+        'current_page',
+        'from',
+        'last_page',
+        'path',
+        'per_page',
+        'to',
+        'total',
+    ]);
+
+    return $this;
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions

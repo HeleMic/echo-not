@@ -1,9 +1,8 @@
 <?php
 
 namespace Database\Factories;
+
 use App\Models\User;
-use App\Support\ApiKey;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,9 +19,8 @@ class ApplicationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->unique()->words(3, true),
-            'description' => fake()->sentence(),
-            'api_key' => ApiKey::generate(),
+            'name' => fake()->unique()->word(),
+            'description' => fake()->sentence(10, true),
         ];
     }
 

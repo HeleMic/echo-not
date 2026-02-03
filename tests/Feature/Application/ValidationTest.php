@@ -1,144 +1,276 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\User;
 use App\Models\Application;
 
-test('user cannot create application with empty name', function () {
-    $user = User::factory()->create();
+/*
+|--------------------------------------------------------------------------
+| Application Validation Tests
+|--------------------------------------------------------------------------
+|
+| These tests verify input validation for Application operations.
+| Uses Pest datasets for comprehensive coverage of edge cases.
+|
+*/
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => '',
-            'description' => 'This is a test application without name.',
+describe('Store Validation - Name Field', function () {
+    it('rejects invalid names on create', function (mixed $name) {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => $name,
+                'description' => 'Valid description',
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['name']);
+    })->with([
+                'empty string' => [''],
+                'null value' => [null],
+                'too long (256 chars)' => [str_repeat('a', 256)],
+                'too long (500 chars)' => [str_repeat('x', 500)],
+            ]);
+
+    test('accepts valid name with max length (255 chars)', function () {
+        $user = User::factory()->create();
+        $maxLengthName = str_repeat('a', 255);
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => $maxLengthName,
+            ]);
+
+        $response->assertCreated();
+
+        $this->assertDatabaseHas('applications', [
+            'user_id' => $user->id,
+            'name' => $maxLengthName,
         ]);
-
-    $response->assertUnprocessable();
+    });
 });
 
-test('user cannot create application with name too long', function () {
-    $user = User::factory()->create();
+describe('Store Validation - Description Field', function () {
+    test('description is optional', function () {
+        $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => fake()->text(500),
-            'description' => 'This is a test application with a long name.',
-        ]);
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => 'valid-name-' . fake()->unique()->word(),
+            ]);
 
-    $response->assertUnprocessable();
+        $response->assertCreated();
+    });
+
+    test('description can be empty string', function () {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => 'valid-name-' . fake()->unique()->word(),
+                'description' => '',
+            ]);
+
+        $response->assertCreated();
+    });
+
+    test('description cannot exceed max length', function () {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => 'valid-name-' . fake()->unique()->word(),
+                'description' => str_repeat('a', 500),
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['description']);
+    });
 });
 
-test('user cannot create two application with the same name', function () {
-    $user = User::factory()->create();
+describe('Store Validation - Name Uniqueness', function () {
+    test('cannot create two applications with the same name', function () {
+        $user = User::factory()->create();
+        $duplicateName = 'duplicate-app-name';
 
-    $this->actingAs($user, 'sanctum');
+        $this->actingAs($user);
 
-    $firstResponse = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $secondResponse = $this->postJson(route('applications.store'), [
-        'name' => 'Test Application',
-        'description' => 'This is a test application.',
-    ]);
-
-    $firstResponse->assertCreated();
-    $secondResponse->assertUnprocessable();
-});
-
-test('user can update application keeping the same name', function () {
-    $user = User::factory()->create();
-    $application = Application::factory()->withUser($user)->create();
-
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => $application->name,
-            'description' => 'This is a test application (updated).',
+        $firstResponse = $this->postJson(route('applications.store'), [
+            'name' => $duplicateName,
         ]);
 
-    $response->assertOk();
-});
-
-test('user cannot update application with empty name', function () {
-    $user = User::factory()->create();
-    $application = Application::factory()->withUser($user)->create();
-
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => '',
-            'description' => 'This is a test application without name.',
+        $secondResponse = $this->postJson(route('applications.store'), [
+            'name' => $duplicateName,
         ]);
 
-    $response->assertUnprocessable();
+        $firstResponse->assertCreated();
+        $secondResponse->assertUnprocessable();
+        $secondResponse->assertJsonValidationErrors(['name']);
+    });
+
+    test('different users cannot have applications with same name (global uniqueness)', function () {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $sharedName = 'shared-name-' . fake()->unique()->word();
+
+        // User 1 creates application
+        $response1 = $this
+            ->actingAs($user1)
+            ->postJson(route('applications.store'), [
+                'name' => $sharedName,
+            ]);
+
+        // User 2 tries same name
+        $response2 = $this
+            ->actingAs($user2)
+            ->postJson(route('applications.store'), [
+                'name' => $sharedName,
+            ]);
+
+        $response1->assertCreated();
+        $response2->assertUnprocessable();
+        $response2->assertJsonValidationErrors(['name']);
+    });
 });
 
-test('user cannot update application with the same name of another application', function () {
-    $user = User::factory()->create();
-    $applications = Application::factory()->withUser($user)->count(2)->create();
+describe('Update Validation - Name Field', function () {
+    it('rejects invalid names on update', function (mixed $name) {
+        $user = User::factory()->create();
+        $application = Application::factory()->withUser($user)->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $applications[0]->id]), [
-            'name' => $applications[1]->name,
-            'description' => 'This is a test application with the same of another application.',
+        $response = $this
+            ->actingAs($user)
+            ->putJson(route('applications.update', ['application' => $application->id]), [
+                'name' => $name,
+                'description' => 'Valid description',
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['name']);
+    })->with([
+                'empty string' => [''],
+                'null value' => [null],
+                'too long (256 chars)' => [str_repeat('a', 256)],
+            ]);
+
+    test('user can update application keeping the same name', function () {
+        $user = User::factory()->create();
+        $application = Application::factory()->withUser($user)->create();
+        $originalName = $application->name;
+
+        $response = $this
+            ->actingAs($user)
+            ->putJson(route('applications.update', ['application' => $application->id]), [
+                'name' => $originalName,
+                'description' => 'Updated description',
+            ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'name' => $originalName,
         ]);
+    });
 
-    $response->assertUnprocessable();
+    test('cannot update to another existing application name', function () {
+        $user = User::factory()->create();
+        $app1 = Application::factory()->withUser($user)->create();
+        $app2 = Application::factory()->withUser($user)->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->putJson(route('applications.update', ['application' => $app1->id]), [
+                'name' => $app2->name, // Try to steal app2's name
+                'description' => 'Description',
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['name']);
+
+        // Verify original name preserved
+        $this->assertDatabaseHas('applications', [
+            'id' => $app1->id,
+            'name' => $app1->name,
+        ]);
+    });
 });
 
-test('user can create application with an empty description', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => 'Test Application',
+describe('Update Validation - Description Field', function () {
+    test('description can be empty on update', function () {
+        $user = User::factory()->create();
+        $application = Application::factory()->withUser($user)->create([
+            'description' => 'Original description',
         ]);
 
-    $response->assertCreated();
+        $response = $this
+            ->actingAs($user)
+            ->putJson(route('applications.update', ['application' => $application->id]), [
+                'name' => $application->name,
+                'description' => '',
+            ]);
+
+        $response->assertOk();
+    });
+
+    test('description cannot exceed max length on update', function () {
+        $user = User::factory()->create();
+        $application = Application::factory()->withUser($user)->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->putJson(route('applications.update', ['application' => $application->id]), [
+                'name' => $application->name,
+                'description' => str_repeat('a', 500),
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['description']);
+    });
 });
 
-test('user cannot create application with description too long', function () {
-    $user = User::factory()->create();
+describe('Validation Error Response Format', function () {
+    test('validation errors return proper JSON structure', function () {
+        $user = User::factory()->create();
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->postJson(route('applications.store'), [
-            'name' => 'Test Application',
-            'description' => fake()->text(500),
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                'name' => '', // Invalid
+                'description' => str_repeat('a', 500), // Invalid
+            ]);
+
+        $response->assertUnprocessable();
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'name',
+                'description',
+            ],
         ]);
+    });
 
-    $response->assertUnprocessable();
-});
+    test('multiple validation errors are returned together', function () {
+        $user = User::factory()->create();
 
-test('user can update application with an empty description', function () {
-    $user = User::factory()->create();
-    $application = Application::factory()->withUser($user)->create();
+        $response = $this
+            ->actingAs($user)
+            ->postJson(route('applications.store'), [
+                // Missing name
+                'description' => str_repeat('a', 500), // Invalid
+            ]);
 
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => 'Test Application',
-            'description' => '',
-        ]);
+        $response->assertUnprocessable();
 
-    $response->assertOk();
-});
-
-test('user cannot update application with description too long', function () {
-    $user = User::factory()->create();
-    $application = Application::factory()->withUser($user)->create();
-
-    $response = $this
-        ->actingAs($user, 'sanctum')
-        ->putJson(route('applications.update', ['application' => $application->id]), [
-            'name' => 'Test Application',
-            'description' => fake()->text(500),
-        ]);
-
-    $response->assertUnprocessable();
+        $errors = $response->json('errors');
+        expect(array_keys($errors))->toContain('name');
+        expect(array_keys($errors))->toContain('description');
+    });
 });

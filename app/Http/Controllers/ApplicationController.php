@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers\Applications;
+namespace App\Http\Controllers;
 
 use App\Models\Application;
 use Illuminate\Http\Response;
+use App\Services\ApplicationService;
 use App\Http\Controllers\Controller;
-use App\DTO\Applications\ApplicationDTO;
-use App\Services\Applications\ApplicationService;
-use App\Http\Resources\Applications\ApplicationResource;
+use App\Http\Resources\ApplicationResource;
+use App\DTO\Applications\StoreApplicationDTO;
+use App\DTO\Applications\UpdateApplicationDTO;
 use App\Http\Requests\Applications\StoreApplicationRequest;
 use App\Http\Requests\Applications\UpdateApplicationRequest;
 
@@ -39,13 +40,13 @@ class ApplicationController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\Applications\StoreApplicationRequest $request
-     * @return \App\Http\Resources\Applications\ApplicationResource
+     * @return \App\Http\Resources\ApplicationResource
      */
     public function store(StoreApplicationRequest $request): ApplicationResource
     {
         $this->authorize('create', Application::class);
 
-        $dto = ApplicationDTO::fromStoreRequest($request)
+        $dto = StoreApplicationDTO::fromFormRequest($request)
             ->withUserId($request->user()->id);
 
         $application = $this->applicationService->create($dto);
@@ -60,13 +61,11 @@ class ApplicationController extends Controller
      * Get the specified resource from storage.
      *
      * @param  string $id
-     * @return \App\Http\Resources\Applications\ApplicationResource
+     * @return \App\Http\Resources\ApplicationResource
      */
     public function show(Application $application): ApplicationResource
     {
         $this->authorize('view', $application);
-
-        $application = $this->applicationService->find($application->id);
 
         return new ApplicationResource($application);
     }
@@ -76,13 +75,13 @@ class ApplicationController extends Controller
      *
      * @param  \App\Http\Requests\Applications\UpdateApplicationRequest $request
      * @param  \App\Models\Application $application
-     * @return \App\Http\Resources\Applications\ApplicationResource
+     * @return \App\Http\Resources\ApplicationResource
      */
     public function update(UpdateApplicationRequest $request, Application $application): ApplicationResource
     {
         $this->authorize('update', $application);
 
-        $dto = ApplicationDTO::fromUpdateRequest($request);
+        $dto = UpdateApplicationDTO::fromFormRequest($request);
 
         $application = $this->applicationService->update($application, $dto);
 

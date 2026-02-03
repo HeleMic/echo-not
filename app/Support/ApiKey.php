@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class ApiKey
 {
@@ -16,6 +17,18 @@ class ApiKey
         $settings = self::getSettings();
 
         return $settings['prefix'] . Str::random($settings['length']);
+    }
+
+    /**
+     * Compare a plain API key with a hashed one.
+     *
+     * @param  string $plainKey
+     * @param  string $hashedKey
+     * @return bool
+     */
+    public static function compare(string $plainKey, string $hashedKey): bool
+    {
+        return Hash::check($plainKey, $hashedKey);
     }
 
     /**

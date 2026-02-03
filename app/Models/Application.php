@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -36,7 +37,6 @@ class Application extends Model
         'user_id',
         'name',
         'description',
-        'api_key',
     ];
 
     /**
@@ -44,18 +44,26 @@ class Application extends Model
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'api_key',
-    ];
+    protected $hidden = [];
 
     /**
      * Get the user that owns the application
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<\App\Models\User>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the api keys owned by the application.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ApiKey>
+     */
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(ApiKey::class);
     }
 
     /**

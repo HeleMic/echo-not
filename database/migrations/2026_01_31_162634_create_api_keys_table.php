@@ -10,14 +10,21 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('applications', function (Blueprint $table) {
+        Schema::create('api_keys', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')
-                ->constrained(table: 'users', column: 'id')
+            $table->foreignUuid('application_id')
+                ->constrained(table: 'applications', column: 'id')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->string('name')->unique();
-            $table->string('description')->nullable();
+            $table->string('key')->unique();
+            $table->dateTime('last_used_at')
+                ->nullable(true)
+                ->default(null);
+            $table->dateTime('expires_at');
+            $table->dateTime('revoked_at')
+                ->nullable(true)
+                ->default(null);
             $table->timestamps();
         });
     }
@@ -27,6 +34,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('applications');
+        Schema::dropIfExists('api_keys');
     }
 };

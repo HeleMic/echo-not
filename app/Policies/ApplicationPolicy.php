@@ -20,7 +20,7 @@ class ApplicationPolicy
      */
     public function view(User $user, Application $application): bool
     {
-        return $application->user()->is($user);
+        return $this->isAdminOrOwner($user, $application);
     }
 
     /**
@@ -36,7 +36,7 @@ class ApplicationPolicy
      */
     public function update(User $user, Application $application): bool
     {
-        return $application->user()->is($user);
+        return $this->isAdminOrOwner($user, $application);
     }
 
     /**
@@ -44,7 +44,7 @@ class ApplicationPolicy
      */
     public function delete(User $user, Application $application): bool
     {
-        return $application->user()->is($user);
+        return $this->isAdminOrOwner($user, $application);
     }
 
     /**
@@ -52,7 +52,7 @@ class ApplicationPolicy
      */
     public function restore(User $user, Application $application): bool
     {
-        return false;
+        return $this->isAdminOrOwner($user, $application);
     }
 
     /**
@@ -60,6 +60,22 @@ class ApplicationPolicy
      */
     public function forceDelete(User $user, Application $application): bool
     {
-        return $application->user()->is($user);
+        return $this->isAdminOrOwner($user, $application);
+    }
+
+    /**
+     * Check if the user is an admin or owns the application.
+     */
+    private function isAdminOrOwner(User $user, Application $application): bool
+    {
+        return $user->isAdmin() || $this->ownsApplication($user, $application);
+    }
+
+    /**
+     * Check if the user owns the application.
+     */
+    private function ownsApplication(User $user, Application $application): bool
+    {
+        return $application->user_id === $user->id;
     }
 }

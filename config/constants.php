@@ -6,7 +6,7 @@ return [
     | Pagination
     |--------------------------------------------------------------------------
     |
-    | This options defines the default pagination settings for the
+    | This options defines the default pagination settings
     */
     'pagination' => [
         'elements_for_page' => 15,

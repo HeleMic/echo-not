@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Applications;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ApplicationResource extends JsonResource
+class ApiKeyResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,12 @@ class ApplicationResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'application_id' => $this->application_id,
             'name' => $this->name,
-            'description' => $this->description,
-            'api_key' => $this->when($request->routeIs('applications.store'), $this->api_key, config('application.api_key.hidden_placeholder')),
+            'key' => $this->when($request->routeIs('api-keys.store') && isset($this->resource->plainKey), $this->resource->plainKey, config('api-keys.hidden_placeholder')),
+            'last_used_at' => $this->last_used_at,
+            'expires_at' => $this->expires_at,
+            'revoked_at' => $this->revoked_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
