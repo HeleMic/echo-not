@@ -19,5 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     // APPLICATION'S API KEYS ROUTES
     // ----------------------------------------------------
     Route::apiResource('api-keys', ApiKeyController::class);
-    Route::post('/api-keys/{id}/revoke', [ApiKeyController::class, 'revoke'])->name('api-keys.revoke');
+    Route::post('/api-keys/{api_key}/revoke', [ApiKeyController::class, 'revoke'])->name('api-keys.revoke');
 });

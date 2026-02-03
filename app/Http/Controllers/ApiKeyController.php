@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\ApiKeyDTO;
 use App\Models\ApiKey;
 use Illuminate\Http\Response;
 use App\Services\ApiKeyService;
+use App\DTO\ApiKeys\StoreApiKeyDTO;
+use App\DTO\ApiKeys\UpdateApiKeyDTO;
 use App\Http\Resources\ApiKeyResource;
 use App\Http\Requests\ApiKeys\StoreApiKeyRequest;
 use App\Http\Requests\ApiKeys\UpdateApiKeyRequest;
@@ -44,7 +45,7 @@ class ApiKeyController extends Controller
     {
         $this->authorize('create', ApiKey::class);
 
-        $dto = ApiKeyDTO::fromStoreRequest($request);
+        $dto = StoreApiKeyDTO::fromFormRequest($request);
 
         $apiKey = $this->apiKeyService->create($dto);
 
@@ -74,7 +75,7 @@ class ApiKeyController extends Controller
     {
         $this->authorize('update', $apiKey);
 
-        $dto = ApiKeyDTO::fromUpdateRequest($request);
+        $dto = UpdateApiKeyDTO::fromFormRequest($request);
 
         $apiKey = $this->apiKeyService->update($apiKey, $dto);
 

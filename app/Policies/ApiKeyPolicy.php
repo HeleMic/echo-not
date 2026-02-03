@@ -20,7 +20,7 @@ class ApiKeyPolicy
      */
     public function view(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
     }
 
     /**
@@ -36,7 +36,7 @@ class ApiKeyPolicy
      */
     public function update(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
     }
 
     /**
@@ -44,7 +44,7 @@ class ApiKeyPolicy
      */
     public function delete(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
     }
 
     /**
@@ -52,7 +52,7 @@ class ApiKeyPolicy
      */
     public function restore(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
     }
 
     /**
@@ -60,7 +60,7 @@ class ApiKeyPolicy
      */
     public function forceDelete(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
     }
 
     /**
@@ -68,6 +68,24 @@ class ApiKeyPolicy
      */
     public function revoke(User $user, ApiKey $apiKey): bool
     {
-        return $user->isAdmin() || $apiKey->application->user->is($user);
+        return $this->isAdminOrOwner($user, $apiKey);
+    }
+
+    /**
+     * Check if the user is an admin or owns the API key.
+     */
+    private function isAdminOrOwner(User $user, ApiKey $apiKey): bool
+    {
+        return $user->isAdmin() || $this->ownsApiKey($user, $apiKey);
+    }
+
+    /**
+     * Check if the user owns the API key.
+     */
+    private function ownsApiKey(User $user, ApiKey $apiKey): bool
+    {
+        // Commented out original line to avoid N+1 query issue
+        // return $apiKey->application->user->is($user);
+        return $apiKey->application->user_id === $user->id;
     }
 }

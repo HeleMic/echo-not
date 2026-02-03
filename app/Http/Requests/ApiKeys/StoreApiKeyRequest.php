@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\ApiKeys;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreApiKeyRequest extends FormRequest
@@ -23,7 +24,11 @@ class StoreApiKeyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'application_id' => ['required', 'uuid', 'exists:applications,id'],
+            'application_id' => [
+                'required',
+                'uuid',
+                Rule::exists('applications', 'id')->where('user_id', $this->user()->id),
+            ],
             'name' => [
                 'required',
                 'string',

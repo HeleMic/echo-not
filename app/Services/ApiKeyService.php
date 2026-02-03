@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\DTO\ApiKeyDTO;
 use App\Models\ApiKey;
-use Illuminate\Support\Facades\Hash;
+use App\DTO\ApiKeys\StoreApiKeyDTO;
+use App\DTO\ApiKeys\UpdateApiKeyDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiKeyService
@@ -26,45 +26,54 @@ class ApiKeyService
      */
     public function getAll(User $user): LengthAwarePaginator
     {
+        $query = ApiKey::with('application.user');
+
         if ($user->isAdmin()) {
-            return ApiKey::paginate(config('constants.pagination.elements_for_page'));
+            return $query->paginate(config('constants.pagination.elements_for_page'));
         }
 
-        return ApiKey::paginate(config('constants.pagination.elements_for_page'));
+        $applicationIds = $user->applications()->pluck('id');
+
+        return $query
+            ->whereIn('application_id', $applicationIds)
+            ->paginate(config('constants.pagination.elements_for_page'));
     }
 
     /**
      * Create a new api key.
      *
-     * @param  \App\DTO\ApiKeyDTO $dto
+     * @param  \App\DTO\ApiKeys\StoreApiKeyDTO $dto
      * @return \App\Models\ApiKey
      */
-    public function create(ApiKeyDTO $dto): ApiKey
+    public function create(StoreApiKeyDTO $dto): ApiKey
     {
-        // Generate a new hashed key
-        $dto = $dto->withKey(Hash::make(\App\Support\ApiKey::generate()));
+        // Generate a new key
+        $plainKey = \App\Support\ApiKey::generate();
 
         // Set default expiration if not provided
         if ($dto->expiresAt === null) {
-            $dto = $dto->withExpiresAt(now()->addSeconds(config('api-keys.duration')));
+            $dto = $dto->withExpiresAt(now()->addSeconds((int) config('api-keys.duration'))->toDateTimeString());
         }
 
-        return ApiKey::create([
+        $apiKey = ApiKey::create([
             'application_id' => $dto->applicationId,
             'name' => $dto->name,
-            'key' => $dto->key,
-            'expires_at' => $dto->expiresAt?->format(config('constants.date.format')),
+            'key' => $plainKey,
+            'expires_at' => $dto->expiresAt,
         ]);
+
+        $apiKey->plainKey = $plainKey;
+        return $apiKey;
     }
 
     /**
      * Update an existing api key.
      *
      * @param  \App\Models\ApiKey $apiKey
-     * @param  \App\DTO\ApiKeyDTO $dto
+     * @param  \App\DTO\ApiKeys\UpdateApiKeyDTO $dto
      * @return \App\Models\ApiKey
      */
-    public function update(ApiKey $apiKey, ApiKeyDTO $dto): ApiKey
+    public function update(ApiKey $apiKey, UpdateApiKeyDTO $dto): ApiKey
     {
         $apiKey->update([
             'name' => $dto->name,
@@ -92,7 +101,7 @@ class ApiKeyService
     public function revoke(ApiKey $apiKey): ApiKey
     {
         $apiKey->update([
-            'revokedAt' => now(),
+            'revoked_at' => now(),
         ]);
         return $apiKey;
     }
