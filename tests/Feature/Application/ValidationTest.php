@@ -29,11 +29,11 @@ describe('Store Validation - Name Field', function () {
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['name']);
     })->with([
-        'empty string' => [''],
-        'null value' => [null],
-        'too long (256 chars)' => [str_repeat('a', 256)],
-        'too long (500 chars)' => [str_repeat('x', 500)],
-    ]);
+                'empty string' => [''],
+                'null value' => [null],
+                'too long (256 chars)' => [str_repeat('a', 256)],
+                'too long (500 chars)' => [str_repeat('x', 500)],
+            ]);
 
     test('accepts valid name with max length (255 chars)', function () {
         $user = User::factory()->create();
@@ -155,10 +155,10 @@ describe('Update Validation - Name Field', function () {
         $response->assertUnprocessable();
         $response->assertJsonValidationErrors(['name']);
     })->with([
-        'empty string' => [''],
-        'null value' => [null],
-        'too long (256 chars)' => [str_repeat('a', 256)],
-    ]);
+                'empty string' => [''],
+                'null value' => [null],
+                'too long (256 chars)' => [str_repeat('a', 256)],
+            ]);
 
     test('user can update application keeping the same name', function () {
         $user = User::factory()->create();

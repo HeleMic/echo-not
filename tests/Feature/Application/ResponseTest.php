@@ -105,7 +105,7 @@ describe('Index Response', function () {
         $response->assertOk();
 
         expect($response->json())->toHavePaginatedStructure(
-            min($totalItems, config('constants.pagination.elements_for_page'))
+            min($totalItems, config('constants.pagination.elements_for_page')),
         );
     });
 

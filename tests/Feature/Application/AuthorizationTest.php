@@ -143,14 +143,11 @@ describe('Cross-User Access Prevention (IDOR Protection)', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Privileges Tests (SKIPPED)
+| Admin Privileges Tests
 |--------------------------------------------------------------------------
 |
-| NOTE: The ApplicationPolicy currently does not implement admin privileges.
-| These tests are skipped until the Policy is updated to include admin logic
-| similar to ApiKeyPolicy with isAdminOrOwner pattern.
-|
-| TODO: Implement admin privileges in ApplicationPolicy and enable these tests.
+| These tests verify that administrators have full access to all applications,
+| regardless of ownership. This mirrors the behavior in ApiKeyPolicy.
 |
 */
 
@@ -166,7 +163,7 @@ describe('Admin Privileges', function () {
 
         $response->assertOk();
         expect($response->json('data.id'))->toBe($application->id);
-    })->skip('ApplicationPolicy does not yet implement admin privileges');
+    });
 
     test('admin can view all applications in index', function () {
         $admin = User::factory()->withAdmin()->create();
@@ -182,7 +179,7 @@ describe('Admin Privileges', function () {
 
         $response->assertOk();
         expect($response->json('data'))->toHaveCount(5);
-    })->skip('ApplicationPolicy does not yet implement admin privileges for viewAny');
+    });
 
     test('admin can update any application', function () {
         $admin = User::factory()->withAdmin()->create();
@@ -203,7 +200,7 @@ describe('Admin Privileges', function () {
             'id' => $application->id,
             'name' => $newName,
         ]);
-    })->skip('ApplicationPolicy does not yet implement admin privileges');
+    });
 
     test('admin can delete any application', function () {
         $admin = User::factory()->withAdmin()->create();
@@ -218,5 +215,5 @@ describe('Admin Privileges', function () {
         $response->assertNoContent();
 
         $this->assertDatabaseMissing('applications', ['id' => $applicationId]);
-    })->skip('ApplicationPolicy does not yet implement admin privileges');
+    });
 });
