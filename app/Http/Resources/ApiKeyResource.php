@@ -18,7 +18,7 @@ class ApiKeyResource extends JsonResource
             'id' => $this->id,
             'application_id' => $this->application_id,
             'name' => $this->name,
-            'key' => $this->when($request->routeIs('api-keys.store') && $this->resource->plainKey !== null, $this->resource->plainKey, config('api-keys.hidden_placeholder')),
+            'key' => $this->when($request->routeIs('api-keys.store') && isset($this->resource->plainKey), $this->resource->plainKey, config('api-keys.hidden_placeholder')),
             'last_used_at' => $this->last_used_at,
             'expires_at' => $this->expires_at,
             'revoked_at' => $this->revoked_at,
