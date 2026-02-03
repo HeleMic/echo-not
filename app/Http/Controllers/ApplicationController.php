@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\DTO\ApplicationDTO;
 use App\Models\Application;
 use Illuminate\Http\Response;
 use App\Services\ApplicationService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApplicationResource;
+use App\DTO\Applications\StoreApplicationDTO;
+use App\DTO\Applications\UpdateApplicationDTO;
 use App\Http\Requests\Applications\StoreApplicationRequest;
 use App\Http\Requests\Applications\UpdateApplicationRequest;
 
@@ -45,7 +46,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('create', Application::class);
 
-        $dto = ApplicationDTO::fromStoreRequest($request)
+        $dto = StoreApplicationDTO::fromFormRequest($request)
             ->withUserId($request->user()->id);
 
         $application = $this->applicationService->create($dto);
@@ -80,7 +81,7 @@ class ApplicationController extends Controller
     {
         $this->authorize('update', $application);
 
-        $dto = ApplicationDTO::fromUpdateRequest($request);
+        $dto = UpdateApplicationDTO::fromFormRequest($request);
 
         $application = $this->applicationService->update($application, $dto);
 
