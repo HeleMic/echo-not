@@ -51,15 +51,14 @@ class ApiKeyService
         $plainKey = \App\Support\ApiKey::generate();
 
         // Set default expiration if not provided
-        if ($dto->expiresAt === null) {
-            $dto = $dto->withExpiresAt(now()->addSeconds((int) config('api-keys.duration'))->toDateTimeString());
-        }
+        $expiresAt = $dto->expiresAt
+            ?? now()->addSeconds((int) config('api-keys.duration'))->toDateTimeString();
 
         $apiKey = ApiKey::create([
             'application_id' => $dto->applicationId,
             'name' => $dto->name,
             'key' => $plainKey,
-            'expires_at' => $dto->expiresAt,
+            'expires_at' => $expiresAt,
         ]);
 
         $apiKey->plainKey = $plainKey;
