@@ -17,6 +17,7 @@ return new class extends Migration {
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->string('name')->unique();
+            $table->string('key_prefix');
             $table->string('key')->unique();
             $table->dateTime('last_used_at')
                 ->nullable(true)
