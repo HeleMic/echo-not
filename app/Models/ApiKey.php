@@ -34,6 +34,7 @@ class ApiKey extends Model
     protected $fillable = [
         'application_id',
         'name',
+        'key_prefix',
         'key',
         'last_used_at',
         'expires_at',
@@ -58,7 +59,6 @@ class ApiKey extends Model
     protected function casts(): array
     {
         return [
-            'key' => 'hashed',
             'last_used_at' => 'datetime',
             'expires_at' => 'datetime',
             'revoked_at' => 'datetime',

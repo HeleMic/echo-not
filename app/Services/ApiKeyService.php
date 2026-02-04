@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Str;
 use App\Models\User;
 use App\Models\ApiKey;
 use App\DTO\ApiKeys\StoreApiKeyDTO;
@@ -57,7 +58,8 @@ class ApiKeyService
         $apiKey = ApiKey::create([
             'application_id' => $dto->applicationId,
             'name' => $dto->name,
-            'key' => $plainKey,
+            'key_prefix' => \App\Support\ApiKey::getPrefix($plainKey),
+            'key' => \App\Support\ApiKey::hash($plainKey),
             'expires_at' => $expiresAt,
         ]);
 

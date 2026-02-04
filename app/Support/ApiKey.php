@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 
 class ApiKey
 {
@@ -20,15 +19,26 @@ class ApiKey
     }
 
     /**
-     * Compare a plain API key with a hashed one.
+     * Extract the prefix from a plain API key.
      *
      * @param  string $plainKey
-     * @param  string $hashedKey
-     * @return bool
+     * @return string
      */
-    public static function compare(string $plainKey, string $hashedKey): bool
+    public static function getPrefix(string $plainKey): string
     {
-        return Hash::check($plainKey, $hashedKey);
+        $settings = self::getSettings();
+        return substr($plainKey, 0, \strlen($settings['prefix']) + 6);
+    }
+
+    /**
+     * Hash a plain API key using SHA256.
+     *
+     * @param  string $plainKey
+     * @return string
+     */
+    public static function hash(string $plainKey): string
+    {
+        return hash('sha256', $plainKey);
     }
 
     /**
@@ -39,8 +49,8 @@ class ApiKey
     protected static function getSettings(): array
     {
         return [
-            'prefix' => config('application.api_key.prefix'),
-            'length' => config('application.api_key.length'),
+            'prefix' => config('api-keys.prefix'),
+            'length' => config('api-keys.length'),
         ];
     }
 }

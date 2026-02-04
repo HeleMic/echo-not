@@ -26,10 +26,13 @@ class ApiKeyFactory extends Factory
         $fakeRangeMin = '+10 seconds';
         $fakeRangeMax = "+$apiKeyMaxDuration seconds";
 
+        $plainKey = ApiKey::generate();
+
         return [
             'application_id' => Application::factory(),
             'name' => fake()->unique()->word(),
-            'key' => Hash::make(ApiKey::generate()),
+            'key_prefix' => ApiKey::getPrefix($plainKey),
+            'key' => ApiKey::hash($plainKey),
             'last_used_at' => null,
             'expires_at' => fake()->datetimeBetween($fakeRangeMin, $fakeRangeMax, 'UTC')->format('Y-m-d H:i:s'),
             'revoked_at' => null,
