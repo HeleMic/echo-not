@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Middleware\AuthenticateWithApplicationApiKey;
 
 Route::get('/user', function (Request $request) {
@@ -27,4 +28,5 @@ Route::middleware(AuthenticateWithApplicationApiKey::class)->group(function () {
     // ----------------------------------------------------
     // NOTIFICATION'S ROUTES
     // ----------------------------------------------------
+    Route::post('/notifications', [NotificationController::class, 'store'])->name('notifications.store');
 });
