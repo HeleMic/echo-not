@@ -41,6 +41,22 @@ class ApiKeyService
     }
 
     /**
+     * Find an api key by its plain key.
+     *
+     * @param  string $plainKey
+     * @return \App\Models\ApiKey|null
+     */
+    public function findByPlainKey(string $plainKey): ?ApiKey
+    {
+        $hashedKey = \App\Support\ApiKey::hash($plainKey);
+
+        return ApiKey::valid()
+            ->with('application')
+            ->where('key', $hashedKey)
+            ->first();
+    }
+
+    /**
      * Create a new api key.
      *
      * @param  \App\DTO\ApiKeys\StoreApiKeyDTO $dto
@@ -80,6 +96,20 @@ class ApiKeyService
             'name' => $dto->name,
         ]);
         return $apiKey;
+    }
+
+    /**
+     * Update the last used at timestamp of an api key.
+     *
+     * @param  \App\Models\ApiKey $apiKey
+     * @return void
+     */
+    public function updateLastUsedAt(ApiKey $apiKey): void
+    {
+        // Use updateQuietly to avoid triggering model events and updating timestamps
+        $apiKey->updateQuietly([
+            'last_used_at' => now(),
+        ]);
     }
 
     /**

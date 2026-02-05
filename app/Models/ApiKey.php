@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -74,4 +76,16 @@ class ApiKey extends Model
     {
         return $this->belongsTo(Application::class);
     }
+
+    /**
+     * Scope a query to only include valid api keys.
+     */
+    #[Scope]
+    protected function valid(Builder $query): void
+    {
+        $query
+            ->whereNull('revoked_at')
+            ->where('expires_at', '>', now());
+    }
+
 }
